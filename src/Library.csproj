@@ -1,0 +1,24 @@
+<!-- Factory-owned file: agents must not edit it. Dependencies are added by the factory
+     (its scripts/AddDependency tool) at exact versions; shared settings live in
+     Directory.Build.props. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Trysac.OpenxmlReportWriter</AssemblyName>
+    <RootNamespace>Trysac.OpenxmlReportWriter</RootNamespace>
+    <PackageId>Trysac.OpenxmlReportWriter</PackageId>
+    <Version>0.1.0</Version>
+    <Description>Write Excel xlsx reports from typed templates with hand-written SpreadsheetML: shared strings, number formats, row formulas, totals and byte-identical output</Description>
+    <Authors>Miguel Gomez</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Trysac/u933-openxml-report-writer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Trysac/u933-openxml-report-writer</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
