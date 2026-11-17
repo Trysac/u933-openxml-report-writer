@@ -2,7 +2,7 @@ using Xunit;
 
 namespace Trysac.OpenxmlReportWriter.Tests;
 
-/// <summary>Tests of the public API.</summary>
+/// <summary>Tests of the Text helper API.</summary>
 public class TextTests
 {
     [Theory]
@@ -22,6 +22,7 @@ public class TextTests
     {
         var error = Assert.Throws<BlankInputException>(() => Text.Normalize(input));
         Assert.Equal("input is blank", error.Message);
+        Assert.Equal("invalid_value", error.Code);
     }
 
     [Fact]

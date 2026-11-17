@@ -9,4 +9,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Added deterministic ECMA-376 SpreadsheetML report writer (`ReportWriter`, `ReportTemplate`, `ColumnSpec`, `SheetData`, `CellRef`, and `ReportException`).
 - Initial project structure from the factory utility template.
