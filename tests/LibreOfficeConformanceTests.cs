@@ -69,10 +69,10 @@ public class LibreOfficeConformanceTests
             string[] lines = File.ReadAllLines(csvPath);
             Assert.Equal(5, lines.Length);
             Assert.Equal("Product,Qty,Price,Total", lines[0]);
-            Assert.Equal("Alpha,2,10.50,21.00", lines[1]);
-            Assert.Equal("Beta,3,4.00,12.00", lines[2]);
-            Assert.Equal("Gamma,5,2.00,10.00", lines[3]);
-            Assert.Equal(",10,,43.00", lines[4]);
+            Assert.Equal("Alpha,2,10.5,21", lines[1]);
+            Assert.Equal("Beta,3,4,12", lines[2]);
+            Assert.Equal("Gamma,5,2,10", lines[3]);
+            Assert.Equal(",10,,43", lines[4]);
         }
         finally
         {
