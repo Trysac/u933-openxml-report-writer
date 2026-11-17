@@ -1,45 +1,37 @@
-# openxml-report-writer
+# Trysac.OpenxmlReportWriter
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/Trysac/u933-openxml-report-writer/actions/workflows/ci.yml/badge.svg)](https://github.com/Trysac/u933-openxml-report-writer/actions/workflows/ci.yml)
+`Trysac.OpenxmlReportWriter` is a lightweight, zero-dependency library for generating deterministic Excel `.xlsx` reports from typed C# templates. It produces valid ECMA-376 SpreadsheetML packages by manually writing zip entries, ensuring byte-identical output across runs.
 
-Write Excel xlsx reports from typed templates with hand-written SpreadsheetML: shared strings, number formats, row formulas, totals and byte-identical output
+## Why not closedxml/EPPlus?
 
-## Problem
-
-Describe in two or three sentences the concrete problem this utility solves, who hits it, and what
-they do today without it. Replace this paragraph when the first real feature lands.
-
-## Install
-
-NuGet package `Trysac.OpenxmlReportWriter`. Until it is published to nuget.org, build it from a release
-tag with `dotnet pack src/Library.csproj`, then reference the package:
-
-```xml
-<PackageReference Include="Trysac.OpenxmlReportWriter" Version="0.1.0" />
-```
-
-Requires .NET 10 or newer. No dependencies outside the base class library.
+Unlike `ClosedXML` or `EPPlus`, `Trysac.OpenxmlReportWriter` has no runtime dependencies, uses only the .NET base class library, and guarantees byte-identical output with deterministic metadata. It focuses on template-level validation of formulas and structure rather than arbitrary editing of existing files.
 
 ## Usage
 
 ```csharp
 using Trysac.OpenxmlReportWriter;
 
-// Normalize trims surrounding whitespace and lower-cases the text.
-var name = Text.Normalize("  Hello World "); // "hello world"
-
-// Blank input is rejected explicitly instead of returning an empty string.
-Text.Normalize("   "); // throws BlankInputException ("input is blank")
+var template = new ReportTemplate("Sales", [
+    new ColumnSpec("Product", "Product", CellKind.Text, Width: 20),
+    new ColumnSpec("Qty", "Qty", CellKind.Number, NumberFormat: "0", Total: Aggregate.Sum),
+    new ColumnSpec("Price", "Price", CellKind.Number, NumberFormat: "#,##0.00"),
+    new ColumnSpec("Total", "Total", CellKind.Formula, NumberFormat: "#,##0.00", Formula: "{Qty}*{Price}", Total: Aggregate.Sum)
+], TotalsRow: true);
+using var output = new MemoryStream();
+ReportWriter.Write(output, [new SheetData(template, [new Dictionary<string, object?> { ["Product"] = "Widget", ["Qty"] = 3, ["Price"] = 19.95m }])]);
 ```
 
-## Documentation
+## API Summary
 
-- [Architecture](docs/ARCHITECTURE.md) and [decisions](docs/decisions/)
-- [Testing](docs/TESTING.md) and [security](docs/SECURITY.md)
-- [Project record](docs/PROJECT.md) and [stack](docs/STACK.md)
-- [Changelog](CHANGELOG.md) and [contributing guide](CONTRIBUTING.md)
+### Core Classes
+- `ReportWriter.Write(Stream, IReadOnlyList<SheetData>)`: Generates the `.xlsx` package.
+- `ReportTemplate`: Defines worksheet settings (name, totals, freeze headers, auto-filter).
+- `ColumnSpec`: Defines column properties (key, kind, format, width, formula).
+- `SheetData`: Binds a template to a collection of row data.
+- `CellRef`: Helper for converting 1-based coordinates to A1 notation (`ToA1`, `Parse`).
 
-## License
+### Limits & Options
+- **Excel Limits**: Supports up to 255 sheets, 1,048,576 rows, 16,384 columns, 32,767 characters per cell, and 31-character sheet names.
+- **Error Handling**: Throws `ReportException` for validation errors (e.g., `invalid_sheet_name`, `invalid_formula`, `too_many_rows`, `unknown_column`).
 
-[MIT](LICENSE) (c) 2026 Miguel Gomez
+See [docs/SECURITY.md](docs/SECURITY.md) for details on threat modeling.

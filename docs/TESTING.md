@@ -1,36 +1,6 @@
-# Testing
+# Testing Strategy
 
-## Running
-
-```sh
-dotnet test Library.sln                # xUnit and FsCheck tests
-dotnet run --project scripts/Check --  # every gate, as CI and the factory run it
-```
-
-## Policy
-
-- Line coverage of the library (measured by coverlet) must stay at or above 80 %; the gate fails
-  below it.
-- Tests exercise the public API. They assert every observable effect: returned values, thrown
-  exceptions (`Assert.Throws`) and their messages.
-- Property tests (FsCheck `[Property]`) state invariants such as idempotence or round trips.
-- Each bug fix starts with a failing test that reproduces it.
-- Tests are deterministic: no network, no wall clock, no dependence on test order.
-
-## Tiers
-
-- Local tier (every gate run, coverage measured here): unit and property tests, plus conformance
-  on small fixtures kept in the repository.
-- CI tier: conformance that needs an external tool or a download. Mark the test class or method
-  with `[Trait("Category", "conformance")]`; the tests gate filters the trait out
-  (`Category!=conformance`) unless `scripts/Check` runs with `FABRICA_CI=1`, while the lint gate
-  always compiles it. The CI `conformance` job sets `FABRICA_CI=1` and runs the full suite. Tools
-  are installed by the optional `ci/conformance-setup.sh` (bash, CI only; verify every download
-  against a pinned SHA-256), and tests return early with a clear message when their tool is
-  missing.
-
-## Layout
-
-Tests live in `tests/` in the namespace `Trysac.OpenxmlReportWriter.Tests`, one `*Tests.cs` class per
-area. Fixtures and golden files go in `tests/fixtures/` and are copied next to the test assembly
-(read them from `AppContext.BaseDirectory`).
+- **Unit & Acceptance Tests**: Located in `tests/ReportWriterTests.cs`. These verify acceptance criteria including multi-sheet support, empty datasets, shared string reuse, culture invariance (`de-DE`), and formula expansion logic.
+- **Schema Validation**: Uses the Open XML SDK (`DocumentFormat.OpenXml`) as a test-only oracle. Generated streams are passed to `OpenXmlValidator` to ensure compliance with the Office 2016 schema.
+- **Property-Based Testing**: Located in `tests/TextPropertiesTests.cs`. Uses `FsCheck` to verify invariants for `CellRef.ToA1` and `CellRef.Parse` across the full valid Excel coordinate range.
+- **Conformance Tier**: Located in `tests/LibreOfficeConformanceTests.cs`. Runs headless `soffice` (LibreOffice Calc) to verify that generated formulas and totals evaluate correctly in a real-world spreadsheet processor.

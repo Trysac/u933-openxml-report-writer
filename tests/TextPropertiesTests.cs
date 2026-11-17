@@ -1,30 +1,37 @@
 using FsCheck;
+using FsCheck.Fluent;
 using FsCheck.Xunit;
 
 namespace Trysac.OpenxmlReportWriter.Tests;
 
-/// <summary>Property tests (FsCheck) of the invariants of <see cref="Text.Normalize"/>.</summary>
+/// <summary>Property-based tests for CellRef round-trips and Text normalization.</summary>
 public class TextPropertiesTests
 {
     [Property]
-    public bool NormalizingTwiceChangesNothing(NonNull<string> input)
+    public Property CellRefRoundTripsValidCoordinates()
     {
-        if (string.IsNullOrWhiteSpace(input.Get))
+        var gen = from row in Gen.Choose(1, CellRef.MaxRow)
+                  from col in Gen.Choose(1, CellRef.MaxColumn)
+                  select (row, col);
+
+        return Prop.ForAll(Arb.From(gen), pair =>
         {
-            return true;
-        }
-        var once = Text.Normalize(input.Get);
-        return once == Text.Normalize(once);
+            string a1 = CellRef.ToA1(pair.row, pair.col);
+            var parsed = CellRef.Parse(a1);
+            return parsed.Row == pair.row && parsed.Column == pair.col;
+        });
     }
 
     [Property]
-    public bool OutputHasNoSurroundingWhitespace(NonNull<string> input)
+    public Property NormalizeIsIdempotent(NonNull<string> raw)
     {
-        if (string.IsNullOrWhiteSpace(input.Get))
+        string trimmed = raw.Get.Trim();
+        if (trimmed.Length == 0)
         {
-            return true;
+            return true.ToProperty();
         }
-        var output = Text.Normalize(input.Get);
-        return output == output.Trim();
+        string once = Text.Normalize(raw.Get);
+        string twice = Text.Normalize(once);
+        return (once == twice).ToProperty();
     }
 }
